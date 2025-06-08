@@ -63,7 +63,6 @@ def main():
             print(f"{name}: Annual return ≈ {ann_ret*100:.2f}%, Monthly return ≈ {mon_ret*100:.3f}%")
         except Exception as e:
             print(f"Could not fetch data for {name} ({ticker}): {e}")
-            # Fall back to zero returns if failure
             benchmark_returns[name] = (0.0, 0.0)
     
     balance = initial_investment
@@ -71,7 +70,6 @@ def main():
     total_dividends = 0.0
     total_fees = 0.0
     
-    # Initialize benchmark balances
     spy_balance = initial_investment
     gold_balance = initial_investment
     pimco_balance = initial_investment
@@ -107,7 +105,6 @@ def main():
             balance -= charge
             total_fees += charge
         
-        # Update benchmark balances with monthly contribution and returns
         spy_balance = (spy_balance + monthly_contribution) * (1 + benchmark_returns["SPY"][1])
         gold_balance = (gold_balance + monthly_contribution) * (1 + benchmark_returns["Gold ETF (GLD)"][1])
         pimco_balance = (pimco_balance + monthly_contribution) * (1 + benchmark_returns["PIMCO Income Fund (PIMIX)"][1])
@@ -129,6 +126,25 @@ def main():
     print(f"SPY index final value: {spy_balance:.2f}")
     print(f"Gold ETF final value: {gold_balance:.2f}")
     print(f"PIMCO Income Fund final value: {pimco_balance:.2f}")
+    
+    # Plot gold prices over the past 10 years using yFinance
+    print("\nGenerating Gold Price Chart Over the Past 10 Years...")
+    try:
+        gold_hist = yf.download("GLD", period="10y")
+        if not gold_hist.empty:
+            plt.figure(figsize=(12, 6))
+            plt.plot(gold_hist['Close'], label='Gold Price (GLD)', color='gold')
+            plt.title("Gold Price (GLD ETF) Over the Past 10 Years")
+            plt.xlabel("Date")
+            plt.ylabel("Price (USD)")
+            plt.legend()
+            plt.grid(True)
+            plt.tight_layout()
+            plt.show()
+        else:
+            print("No historical data available for GLD.")
+    except Exception as e:
+        print(f"Error fetching or plotting gold price history: {e}")
     
     plt.figure(figsize=(12, 6))
     plt.plot(months, balances, label='Portfolio Balance')
